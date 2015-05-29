@@ -6,6 +6,7 @@ STAGE2_FILE_IN = "BandB_2.txt"
 STAGE3_FILE_IN = "BandB_3.txt"
 STAGE4_FILE_IN = "BandB_4.txt"
 STAGE5_FILE_IN = "BandB_5.txt"
+STAGE6_FILE_IN = "BandB_6.txt"
 
 #################################################################
 # Utility functions
@@ -126,6 +127,82 @@ def print_reservations(RL:'list of reservations')-> None:
                                                         rooms["depart"].strftime('%m/%d/%Y'),
                                                         rooms["guest"]))
 
+def print_reservation_by_bedroom(RL:'list of reservations', room_num:int) -> None:
+    print("Reservations for room %d" % (room_num))
+    for rooms in RL:
+        if rooms["room_num"] == room_num:
+            print('  {:10s} to {:10s}:  {:20s}'.format(rooms["arrive"].strftime('%m/%d/%Y'),
+                                                       rooms["depart"].strftime('%m/%d/%Y'),rooms["guest"]))
+
+def print_reservation_by_guest(RL: 'list of reservations', guest: str) -> None:
+    print("Reservations for %s" % (guest))
+    for rooms in RL:
+        if rooms["guest"] == guest:
+            print('  {:10s} to {:10s}:  room {:3d}'.format(rooms["arrive"].strftime('%m/%d/%Y'),
+                                                           rooms["depart"].strftime('%m/%d/%Y'),
+                                                           rooms["room_num"]))
+
+def print_by_arrival_date(RL: 'list of reservations', arrive: str) -> None:
+    arrival=arrive.split("/") #split date string on /
+    arrival=datetime.date(int(arrival[2]),int(arrival[0]),int(arrival[1]))
+    print("Guests arriving on " + arrival.strftime('%m/%d/%Y') + ":")
+    for rooms in RL:
+        if rooms["arrive"] == arrival:
+            print('  {:s} (room {:3d})'.format(rooms["guest"], rooms["room_num"]))
+
+def print_by_departure_date(RL: 'list of reservations', departure: str) -> None:
+    depart=departure.split("/") #split date string on /
+    depart=datetime.date(int(depart[2]),int(depart[0]),int(depart[1]))
+    print("Guests departing on " + depart.strftime('%m/%d/%Y') + ":")
+    for rooms in RL:
+        if rooms["depart"] == depart:
+            print('  {:s} (room {:3d})'.format(rooms["guest"], rooms["room_num"]))
+
+def print_free_bedrooms(BL: 'list of bedrooms', RL: 'list of reservations', dates: str) -> None:
+    arrive = dates.split(" ")[0]
+    departure = dates.split(" ")[1]
+    arrival=arrive.split("/") #split date string on /
+    arrival=datetime.date(int(arrival[2]),int(arrival[0]),int(arrival[1]))
+    depart=departure.split("/") #split date string on /
+    depart=datetime.date(int(depart[2]),int(depart[0]),int(depart[1]))
+
+    print("Bedrooms free between " + arrival.strftime('%m/%d/%Y') + " to " + depart.strftime('%m/%d/%Y') + ":")
+    for bedroom in BL:
+        in_RL = 0
+        for rooms in RL:
+            if rooms["room_num"] == bedroom: #reservation exists
+                if (depart < rooms["depart"] and depart > rooms["arrive"]) \
+                        or (arrival > rooms["arrive"] and arrival < rooms["depart"]) \
+                        or (rooms["depart"] == depart and rooms["arrive"] == arrival):
+                    #if there is a reservation that overlaps
+                    in_RL += 1
+        if in_RL == 0:
+            #print room number only if no reservation or no overlapping reservation with dates
+            print("  {:3d}".format(bedroom))
+
+def print_occupied_bedrooms(BL: 'list of bedrooms', RL: 'list of reservations', dates: str) -> None:
+    arrive = dates.split(" ")[0]
+    departure = dates.split(" ")[1]
+    arrival=arrive.split("/") #split date string on /
+    arrival=datetime.date(int(arrival[2]),int(arrival[0]),int(arrival[1]))
+    depart=departure.split("/") #split date string on /
+    depart=datetime.date(int(depart[2]),int(depart[0]),int(depart[1]))
+
+    print("Bedrooms occupied between " + arrival.strftime('%m/%d/%Y') + " to " + depart.strftime('%m/%d/%Y') + ":")
+    for bedroom in BL:
+        in_RL = 0
+        for rooms in RL:
+            if rooms["room_num"] == bedroom: #reservation exists
+                if (depart < rooms["depart"] and depart > rooms["arrive"]) \
+                        or (arrival > rooms["arrive"] and arrival < rooms["depart"]) \
+                        or (rooms["depart"] == depart and rooms["arrive"] == arrival):
+                    #if there is a reservation that overlaps
+                    in_RL += 1
+        if in_RL > 0:
+            #print room number if there is at least 1 reservation with overlapping dates
+            print("  {:3d}".format(bedroom))
+
+
 #################################################################
 # Stage I
 #################################################################
@@ -235,7 +312,7 @@ stage3()
 #################################################################
 # Stage IV
 #################################################################
-
+'''
 def stage4():
     st1_file= open(STAGE4_FILE_IN, 'r')
     file_data= st1_file.read().splitlines()
@@ -274,17 +351,67 @@ def stage4():
 
 print ("\n### Stage IV ###\n")
 stage4()
-  
+'''
 #################################################################
 # Stage V
 #################################################################      
 
-#def stage5():    
+def stage5():
+    st1_file= open(STAGE5_FILE_IN, 'r')
+    file_data= st1_file.read().splitlines()
+    st1_file.close()
+
+    bedroom_list=[]
+    reservation_list=[]
+    reservation_counter = 0
+
+    for line in file_data:
+        stripped = line.strip()
+        cmd = stripped[0:2].upper()
+        if cmd == '**':
+            continue
+        elif cmd == 'AB':
+            room_num=int(stripped[3:])
+            bedroom_list = add_bedroom(bedroom_list,room_num)
+        elif cmd == 'BD':
+            room_num=int(stripped[3:])
+            bedroom_list, reservation_list = delete_bedroom(bedroom_list,reservation_list,room_num)
+        elif cmd == 'BL':
+            print_bedrooms(bedroom_list)
+        elif cmd == 'NR':
+            reservation_list, reservation_counter = make_reservation(bedroom_list, reservation_list, reservation_counter, stripped)
+        elif cmd == 'RL':
+            print_reservations(reservation_list)
+        elif cmd == 'RD':
+            reserve_num=int(stripped[3:])
+            reservation_list = delete_reservation(reservation_list,reserve_num)
+        elif cmd == 'RB':
+            room_num = int(stripped[3:])
+            print_reservation_by_bedroom(reservation_list, room_num)
+        elif cmd == 'RC':
+            guest = stripped[3:]
+            print_reservation_by_guest(reservation_list, guest)
+        elif cmd == 'LA':
+            arrival = stripped[3:]
+            print_by_arrival_date(reservation_list, arrival)
+        elif cmd == 'LD':
+            departure = stripped[3:]
+            print_by_departure_date(reservation_list, departure)
+        elif cmd == 'LF':
+            dates = stripped[3:]
+            print_free_bedrooms(bedroom_list,reservation_list,dates)
+        elif cmd == 'LO':
+            dates = stripped[3:]
+            print_occupied_bedrooms(bedroom_list, reservation_list, dates)
+        elif cmd == 'PL':
+            print(stripped[3:])
+        else:
+            print ('Error: Unknown command')
+            sys.exit(1)
 
 
-
-#print ("\n### Stage V ###\n")
-#stage5():    
+print ("\n### Stage V ###\n")
+stage5()
 
 #################################################################
 # Stage VI
@@ -296,4 +423,4 @@ stage4()
 
 
 #print ("\n### Stage VI ###\n")
-#stage6():
+#stage6()
