@@ -1,4 +1,4 @@
-package excelcol;
+package Leetcode.excelcol;
 
 /**
  * Created by jennjwu on 3/6/15.

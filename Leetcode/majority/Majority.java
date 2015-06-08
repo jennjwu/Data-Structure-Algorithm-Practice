@@ -1,4 +1,4 @@
-package majority;
+package Leetcode.majority;
 
 import java.util.Arrays;
 

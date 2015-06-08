@@ -1,4 +1,4 @@
-package majority;
+package Leetcode.majority;
 
 public class Main {
 
