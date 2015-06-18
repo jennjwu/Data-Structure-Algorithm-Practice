@@ -5,7 +5,7 @@ package Leetcode.reverseInt;
  */
 public class Main {
     public static void main(String[] args) {
-        int[] intArr = new int[]{10,200,100,101,111,211,51101,-1,-20,-612361,-92010};
+        int[] intArr = new int[]{10,200,100,101,111,211,51101,-1,-20,-612361,-92010,1534236469,-1563847412};
         Solution sol = new Solution();
         for (int i: intArr){
             System.out.println("----------");

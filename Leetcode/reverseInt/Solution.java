@@ -29,10 +29,8 @@ public class Solution {
             digitQ.push(num);
         }
 
-        int newNum = 0;
+        long newNum = 0;
         int length = digitQ.size()-1;
-
-        //TODO: does not test for int overflow yet
 
         for (int i = 0; i < digitQ.size(); i++){
             newNum += digitQ.get(i)* Math.pow(10, length);
@@ -44,6 +42,9 @@ public class Solution {
         }
 
         //System.out.println("new: " + newNum);
-        return newNum;
+        if(newNum <= Integer.MAX_VALUE && newNum >= Integer.MIN_VALUE)
+            return (int)newNum;
+        else
+            return 0;
     }
 }
