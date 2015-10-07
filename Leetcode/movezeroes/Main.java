@@ -25,5 +25,8 @@ public class Main {
 
         System.out.println("====");
         s.moveZeroes(new int[]{4,2,4,0,0,3,0,5,1,0});
+
+        System.out.println("====");
+        s.moveZeroes(new int[]{4,2,4,0,0,3,1,5,1,0});
     }
 }
