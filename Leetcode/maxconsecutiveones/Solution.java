@@ -11,12 +11,11 @@ public class Solution {
 //            System.out.println(nums[i]);
             if (nums[i] == 1) {
                 currentConsecutive++;
+                if (currentConsecutive > maxConsecutive) {
+                    maxConsecutive = currentConsecutive;
+                }
             } else {
                 currentConsecutive = 0;
-            }
-
-            if (currentConsecutive > maxConsecutive) {
-                maxConsecutive = currentConsecutive;
             }
         }
         return maxConsecutive;
